@@ -23,6 +23,7 @@ func (t TodoGateway) GetAll() ([]domain.Todo, error) {
 		todo := domain.Todo{
 			Id: domain.TodoId{Value: t.Id},
 			Title: domain.TodoTitle{Value: t.Title},
+			Person:domain.TodoPerson{Value: t.Person},
 			Done: domain.TodoDone{Value: t.Done},
 		}
 		todos = append(todos, todo)
@@ -51,6 +52,7 @@ func (t TodoGateway) GetById(id domain.TodoId) (domain.Todo, error) {
 func (t TodoGateway) Create(todo domain.CreateTodo) (domain.Todo, error) {
 	createTodo := resource.CreateTodo{
 		Title: todo.Title.Value,
+		Person: todo.Person.Value,
 		Done: false,
 	}
 	
@@ -72,6 +74,7 @@ func (t TodoGateway) Update(id domain.TodoId, todo domain.UpdateTodo) (error) {
 	intId := id.Value
 	updateTodo := resource.UpdateTodo{
 		Title: todo.Title.Value,
+		Person: todo.Person.Value,
 		Done: todo.Done.Value,
 	}
 

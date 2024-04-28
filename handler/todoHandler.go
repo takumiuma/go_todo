@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 	"practice/domain"
 	"practice/usecase"
@@ -11,6 +13,12 @@ import (
 
 type TodoHandler struct {
 	todoUsecase usecase.TodoUsecase
+}
+type Todo struct {
+	Id int `json:"id"`
+	Title string `json:"title"`
+	Person string `json:"person"`
+	Done bool `json:"done"`
 }
 
 func (h TodoHandler) GetAll(c *gin.Context) {
@@ -55,9 +63,12 @@ func (h TodoHandler) GetById(c *gin.Context) {
 }
 
 func (h TodoHandler) Create(c *gin.Context) {
-	title := c.PostForm("title")
+	var param Todo
+	if err := json.NewDecoder(c.Request.Body).Decode(&param); err != nil {
+		log.Fatal(err)
+	}
 
-	if title == "" {
+	if param.Title == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "title is required",
 		})
@@ -65,7 +76,8 @@ func (h TodoHandler) Create(c *gin.Context) {
 	}
 
 	todo := domain.CreateTodo{
-		Title: domain.TodoTitle{Value: title},
+		Title: domain.TodoTitle{Value: param.Title},
+		Person: domain.TodoPerson{Value: param.Person},
 	}
 
 	newTodo, err := h.todoUsecase.Create(todo)
@@ -95,27 +107,21 @@ func (h TodoHandler) Update(c *gin.Context) {
 		return
 	}
 
-	title := c.PostForm("title")
-	d := c.PostForm("done")
-
-	if title == "" && d == "" {
+	var param Todo
+	if err := json.NewDecoder(c.Request.Body).Decode(&param); err != nil {
+		log.Fatal(err)
+	}
+	if param.Title == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "title or done is required",
+			"message": "title is required",
 		})
 		return
 	}
-	
-	done, err := strconv.ParseBool(d)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
-		})
-	}
 
 	updateTodo := domain.UpdateTodo{
-		Title: domain.TodoTitle{Value: title},
-		Done: domain.TodoDone{Value: done},
+		Title: domain.TodoTitle{Value: param.Title},
+		Person:domain.TodoPerson{Value:param.Person},
+		Done: domain.TodoDone{Value: param.Done},
 	}
 
 	err = h.todoUsecase.Update(id, updateTodo)

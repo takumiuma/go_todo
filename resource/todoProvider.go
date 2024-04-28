@@ -63,6 +63,7 @@ func (t TodoDriverImpl) Delete(id int) (error) {
 type Todo struct {
 	Id 				int    `gorm:"primaryKey" json:"id"`
 	Title 		string `gorm:"size:255" json:"title"`
+	Person		string `gorm:"size:100" json:"person"`
 	Done 			bool  `gorm:"default:false" json:"done"`
 }
 
@@ -74,6 +75,7 @@ type Todo struct {
 
 type CreateTodo struct {
 	Title string `json:"title"`
+	Person	string `json:"person"`
 	Done  bool   `json:"done"`
 }
 
@@ -83,6 +85,7 @@ func (CreateTodo) TableName() string {
 
 type UpdateTodo struct {
 	Title string `json:"title"`
+	Person	string `json:"person"`
 	Done  bool   `json:"done"`
 }
 

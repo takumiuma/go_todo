@@ -3,6 +3,7 @@ package domain
 type Todo struct {
 	Id TodoId `json:"id"`
 	Title TodoTitle `json:"title"`
+	Person TodoPerson `json:"person"`
 	Done TodoDone `json:"done"`
 }
 
@@ -14,16 +15,22 @@ type TodoTitle struct {
 	Value string `json:"value"`
 }
 
+type TodoPerson struct{
+	Value string `json:"value"`
+}
+
 type TodoDone struct {
 	Value bool `json:"value"`
 }
 
 type CreateTodo struct {
 	Title TodoTitle
+	Person TodoPerson
 }
 
 type UpdateTodo struct {
 	Title TodoTitle `json:"title"`
+	Person TodoPerson `json:"person"`
 	Done TodoDone `json:"done"`
 }
 
