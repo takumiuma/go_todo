@@ -38,7 +38,7 @@ func (h TodoHandler) GetAll(c *gin.Context) {
 
 func (h TodoHandler) GetById(c *gin.Context) {
 	paramsId := c.Params.ByName("id")
-	intId, err := strconv.Atoi(paramsId)
+	uintId, err := strconv.ParseUint(paramsId, 10, 32)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -47,7 +47,7 @@ func (h TodoHandler) GetById(c *gin.Context) {
 		return
 	}
 	
-	id := domain.TodoId{Value: intId}
+	id := domain.TodoId{Value: uint(uintId)}
 	todo, err := h.todoUsecase.GetById(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -97,8 +97,8 @@ func (h TodoHandler) Create(c *gin.Context) {
 
 func (h TodoHandler) Update(c *gin.Context) {
 	paramsId := c.Params.ByName("id")
-	intId, err := strconv.Atoi(paramsId)
-	id := domain.TodoId{Value: intId}
+	uintId, err := strconv.ParseUint(paramsId, 10, 32)
+	id := domain.TodoId{Value: uint(uintId)}
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -140,7 +140,7 @@ func (h TodoHandler) Update(c *gin.Context) {
 
 func (h TodoHandler) Delete(c *gin.Context) {
 	paramsId := c.Params.ByName("id")
-	Intid, err := strconv.Atoi(paramsId)
+	uintId, err := strconv.ParseUint(paramsId, 10, 32)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H {
@@ -150,7 +150,7 @@ func (h TodoHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	id := domain.TodoId{Value: Intid}
+	id := domain.TodoId{Value: uint(uintId)}
 	err = h.todoUsecase.Delete(id)
 
 	if err != nil {

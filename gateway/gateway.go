@@ -21,7 +21,7 @@ func (t TodoGateway) GetAll() ([]domain.Todo, error) {
 
 	for _, t := range result {
 		todo := domain.Todo{
-			Id: domain.TodoId{Value: t.Id},
+			Id: domain.TodoId{Value: t.ID},
 			Title: domain.TodoTitle{Value: t.Title},
 			Person:domain.TodoPerson{Value: t.Person},
 			Done: domain.TodoDone{Value: t.Done},
@@ -41,7 +41,7 @@ func (t TodoGateway) GetById(id domain.TodoId) (domain.Todo, error) {
 	}
 
 	todo := domain.Todo{
-		Id:	domain.TodoId{Value: result.Id},
+		Id:	domain.TodoId{Value: result.ID},
 		Title: domain.TodoTitle{Value: result.Title},
 		Done: domain.TodoDone{Value: result.Done},
 	}

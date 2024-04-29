@@ -6,10 +6,10 @@ import (
 
 type TodoDriver interface {
 	GetAll() ([]Todo, error)
-	GetById(id int) (Todo, error)
+	GetById(id uint) (Todo, error)
 	Create(todo CreateTodo) (error)
-	Update(id int, todo UpdateTodo) (error)
-	Delete(id int) (error)
+	Update(id uint, todo UpdateTodo) (error)
+	Delete(id uint) (error)
 }
 
 type TodoDriverImpl struct {
@@ -23,7 +23,7 @@ func (t TodoDriverImpl) GetAll() ([]Todo, error) {
 	return todos, nil
 }
 
-func (t TodoDriverImpl) GetById(id int) (Todo, error) {
+func (t TodoDriverImpl) GetById(id uint) (Todo, error) {
 	todo := Todo{}
 	t.conn.First(&todo, id)
 	return todo, nil
@@ -39,8 +39,8 @@ func (t TodoDriverImpl) Create(todo CreateTodo) (error) {
 	return nil
 }
 
-func (t TodoDriverImpl) Update(id int, todo UpdateTodo) (error) {
-	err := t.conn.Model(&todo).Where("id = ?", id).Updates(todo)
+func (t TodoDriverImpl) Update(id uint, todo UpdateTodo) (error) {
+	err := t.conn.Model(&todo).Where("id = ?", id).Select("updated_at", "title", "person", "done").Updates(todo)
 
 	if err != nil {
 		return err.Error
@@ -49,7 +49,7 @@ func (t TodoDriverImpl) Update(id int, todo UpdateTodo) (error) {
 	return nil
 }
 
-func (t TodoDriverImpl) Delete(id int) (error) {
+func (t TodoDriverImpl) Delete(id uint) (error) {
 	todo := Todo{}
 	err := t.conn.Delete(&todo, id)
 
@@ -61,19 +61,14 @@ func (t TodoDriverImpl) Delete(id int) (error) {
 }
 
 type Todo struct {
-	Id 				int    `gorm:"primaryKey" json:"id"`
+    gorm.Model
 	Title 		string `gorm:"size:255" json:"title"`
 	Person		string `gorm:"size:100" json:"person"`
 	Done 			bool  `gorm:"default:false" json:"done"`
 }
 
-// type Todo struct {
-//     gorm.Model
-//     Content string `gorm:"size:255" json:"title"`
-//     Person string
-// }
-
 type CreateTodo struct {
+    gorm.Model
 	Title string `json:"title"`
 	Person	string `json:"person"`
 	Done  bool   `json:"done"`
@@ -84,6 +79,7 @@ func (CreateTodo) TableName() string {
 }
 
 type UpdateTodo struct {
+    gorm.Model
 	Title string `json:"title"`
 	Person	string `json:"person"`
 	Done  bool   `json:"done"`
@@ -95,7 +91,6 @@ func (UpdateTodo) TableName() string {
 
 func NewTodo(id int, title string, done bool) Todo {
 	return Todo{
-		Id: id,
 		Title: title,
 		Done: done,
 	}

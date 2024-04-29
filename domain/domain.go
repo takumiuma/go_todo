@@ -8,7 +8,7 @@ type Todo struct {
 }
 
 type TodoId struct {
-	Value int `json:"value"`
+	Value uint `json:"value"`
 }
 
 type TodoTitle struct {
