@@ -9,6 +9,16 @@ type TodoUsecase struct {
 	todoPort port.TodoPort
 }
 
+func (u TodoUsecase) GetAllUser() ([]domain.User, error) {
+	users, err :=  u.todoPort.GetAllUser()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func (u TodoUsecase) GetAll() ([]domain.Todo, error) {
 	todos, err :=  u.todoPort.GetAll()
 

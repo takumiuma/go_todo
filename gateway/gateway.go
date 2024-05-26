@@ -10,6 +10,28 @@ type TodoGateway struct {
 	todoDriver resource.TodoDriver
 }
 
+func (t TodoGateway) GetAllUser() ([]domain.User, error) {
+	result, err := t.todoDriver.GetAllUser()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var users []domain.User
+
+	for _, t := range result {
+		user := domain.User{
+			Id: domain.UserId{Value: t.ID},
+			Name: domain.UserName{Value: t.Name},
+			Email: domain.UserEmail{Value: t.Email},
+			PhoneNumber:domain.UserPhoneNumber{Value: t.PhoneNumber},
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
 func (t TodoGateway) GetAll() ([]domain.Todo, error) {
 	result, err := t.todoDriver.GetAll()
 

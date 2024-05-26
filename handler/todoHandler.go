@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type TodoHandler struct {
@@ -16,9 +17,24 @@ type TodoHandler struct {
 }
 type Todo struct {
 	Id int `json:"id"`
-	Title string `json:"title"`
-	Person string `json:"person"`
+	Title string `json:"title" validate:"gt=0,lt=100"`
+	Person string `json:"person" validate:"oneof=担当者A 担当者B 担当者C"`
 	Done bool `json:"done"`
+}
+
+func (h TodoHandler) GetAllUser(c *gin.Context) {
+	users, err := h.todoUsecase.GetAllUser()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	response := UsersResponse{
+		Users: users,
+	}
+	c.JSON(http.StatusOK, response)
 }
 
 func (h TodoHandler) GetAll(c *gin.Context) {
@@ -68,12 +84,21 @@ func (h TodoHandler) Create(c *gin.Context) {
 		log.Fatal(err)
 	}
 
-	if param.Title == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "title is required",
-		})
+	validate := validator.New()  //インスタンス生成
+	errors := validate.Struct(param) //バリデーションを実行し、NGの場合、ここでエラーが返る。
+	if(errors != nil) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "title is required",
+			})
 		return
 	}
+
+	// if param.Title == "" {
+	// 	c.JSON(http.StatusBadRequest, gin.H{
+	// 		"message": "title is required",
+	// 	})
+	// 	return
+	// }
 
 	todo := domain.CreateTodo{
 		Title: domain.TodoTitle{Value: param.Title},
@@ -168,6 +193,10 @@ func (h TodoHandler) Delete(c *gin.Context) {
 
 func ProvideTodoHandler(u usecase.TodoUsecase) *TodoHandler {
 	return &TodoHandler{u}
+}
+
+type UsersResponse struct {
+	Users []domain.User `json:"users"`
 }
 
 type TodosResponse struct {

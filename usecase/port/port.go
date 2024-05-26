@@ -3,6 +3,7 @@ package port
 import "practice/domain"
 
 type TodoPort interface {
+	GetAllUser() ([]domain.User, error)
 	GetAll() ([]domain.Todo, error)
 	GetById(id domain.TodoId) (domain.Todo, error)
 	Create(todo domain.CreateTodo) (domain.Todo, error)

@@ -1,10 +1,33 @@
 package domain
 
+type User struct {
+	Id UserId `json:"id"`
+	Name UserName `json:"name"`
+	Email UserEmail `json:"email"`
+	PhoneNumber UserPhoneNumber `json:"phone_number"`
+}
+
 type Todo struct {
 	Id TodoId `json:"id"`
 	Title TodoTitle `json:"title"`
 	Person TodoPerson `json:"person"`
 	Done TodoDone `json:"done"`
+}
+
+type UserId struct {
+	Value uint `json:"value"`
+}
+
+type UserName struct {
+	Value string `json:"value"`
+}
+
+type UserEmail struct {
+	Value string `json:"value"`
+}
+
+type UserPhoneNumber struct{
+	Value string `json:"value"`
 }
 
 type TodoId struct {

@@ -5,6 +5,7 @@ import (
 )
 
 type TodoDriver interface {
+	GetAllUser() ([]User, error)
 	GetAll() ([]Todo, error)
 	GetById(id uint) (Todo, error)
 	Create(todo CreateTodo) (error)
@@ -14,6 +15,13 @@ type TodoDriver interface {
 
 type TodoDriverImpl struct {
 	conn *gorm.DB
+}
+
+func (t TodoDriverImpl) GetAllUser() ([]User, error) {
+	users := []User{}
+	t.conn.Find(&users)
+
+	return users, nil
 }
 
 func (t TodoDriverImpl) GetAll() ([]Todo, error) {
@@ -58,6 +66,13 @@ func (t TodoDriverImpl) Delete(id uint) (error) {
 	}
 
 	return nil
+}
+
+type User struct {
+    gorm.Model
+	Name 		string `gorm:"size:255" json:"name"`
+	Email 			string  `gorm:"size:100" json:"email"`
+	PhoneNumber		string `gorm:"size:100" json:"phone_number"`
 }
 
 type Todo struct {
