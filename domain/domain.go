@@ -46,6 +46,12 @@ type TodoDone struct {
 	Value bool `json:"value"`
 }
 
+type CreateUser struct {
+	Name UserName
+	Email UserEmail
+	PhoneNumber UserPhoneNumber
+}
+
 type CreateTodo struct {
 	Title TodoTitle
 	Person TodoPerson
@@ -55,6 +61,14 @@ type UpdateTodo struct {
 	Title TodoTitle `json:"title"`
 	Person TodoPerson `json:"person"`
 	Done TodoDone `json:"done"`
+}
+
+func NewUser(name string, email string,phoneNumber string) User {
+	return User{
+		Name: UserName{Value: name},
+		Email: UserEmail{Value: email},
+		PhoneNumber: UserPhoneNumber{Value: phoneNumber},
+	}
 }
 
 func NewTodo(title string, done bool) Todo {

@@ -8,6 +8,7 @@ type TodoDriver interface {
 	GetAllUser() ([]User, error)
 	GetAll() ([]Todo, error)
 	GetById(id uint) (Todo, error)
+	RegistUser(user CreateUser) (error)
 	Create(todo CreateTodo) (error)
 	Update(id uint, todo UpdateTodo) (error)
 	Delete(id uint) (error)
@@ -35,6 +36,16 @@ func (t TodoDriverImpl) GetById(id uint) (Todo, error) {
 	todo := Todo{}
 	t.conn.First(&todo, id)
 	return todo, nil
+}
+
+func (t TodoDriverImpl) RegistUser(user CreateUser) (error) {
+	err := t.conn.Create(&user)
+
+	if err != nil {
+		return err.Error
+	}
+
+	return nil
 }
 
 func (t TodoDriverImpl) Create(todo CreateTodo) (error) {
@@ -80,6 +91,18 @@ type Todo struct {
 	Title 		string `gorm:"size:255" json:"title"`
 	Person		string `gorm:"size:100" json:"person"`
 	Done 			bool  `gorm:"default:false" json:"done"`
+}
+
+type CreateUser struct {
+    gorm.Model
+	Name string `json:"name"`
+	Email	string `json:"email"`
+	PhoneNumber  string   `json:"phone_number"`
+}
+
+// 恐らくエイリアスをつけたテーブルを認識させるための関数
+func (CreateUser) TableName() string {
+	return "users"
 }
 
 type CreateTodo struct {

@@ -39,6 +39,16 @@ func (u TodoUsecase) GetById(id domain.TodoId) (domain.Todo, error) {
 	return todo, nil
 }
 
+func (u TodoUsecase) RegistUser(user domain.CreateUser) (domain.User, error) {
+	newUser, err := u.todoPort.RegistUser(user)
+
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return newUser, nil
+}
+
 func (u TodoUsecase) Create(todo domain.CreateTodo) (domain.Todo, error) {
 	newTodo, err := u.todoPort.Create(todo)
 

@@ -71,6 +71,28 @@ func (t TodoGateway) GetById(id domain.TodoId) (domain.Todo, error) {
 	return todo, nil
 }
 
+func (t TodoGateway) RegistUser(user domain.CreateUser) (domain.User, error) {
+	createUser := resource.CreateUser{
+		Name: user.Name.Value,
+		Email: user.Email.Value,
+		PhoneNumber: user.PhoneNumber.Value,
+	}
+	
+	err := t.todoDriver.RegistUser(createUser)
+
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	newUser := domain.NewUser(
+		user.Name.Value,
+		user.Email.Value,
+		user.PhoneNumber.Value,
+	)
+
+	return newUser, nil
+}
+
 func (t TodoGateway) Create(todo domain.CreateTodo) (domain.Todo, error) {
 	createTodo := resource.CreateTodo{
 		Title: todo.Title.Value,

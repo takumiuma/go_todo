@@ -9,12 +9,18 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 type TodoHandler struct {
 	todoUsecase usecase.TodoUsecase
 }
+
+type User struct {
+	Name string `json:"name"`
+	Email string `json:"email"`
+	PhoneNumber string `json:"phone_number"`
+}
+
 type Todo struct {
 	Id int `json:"id"`
 	Title string `json:"title" validate:"gt=0,lt=100"`
@@ -78,27 +84,73 @@ func (h TodoHandler) GetById(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h TodoHandler) RegistUser(c *gin.Context) {
+	var param User
+	if err := json.NewDecoder(c.Request.Body).Decode(&param); err != nil {
+		log.Fatal(err)
+	}
+
+	if param.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "name is required",
+		})
+		return
+	}
+	if param.Email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "email is required",
+		})
+		return
+	}
+	if param.PhoneNumber == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "phone_number is required",
+		})
+		return
+	}
+
+	user := domain.CreateUser{
+		Name: domain.UserName{Value: param.Name},
+		Email: domain.UserEmail{Value: param.Email},
+		PhoneNumber: domain.UserPhoneNumber{Value: param.PhoneNumber},
+	}
+
+	newUser, err := h.todoUsecase.RegistUser(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	response := UserResponse{
+		User: newUser,
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
 func (h TodoHandler) Create(c *gin.Context) {
 	var param Todo
 	if err := json.NewDecoder(c.Request.Body).Decode(&param); err != nil {
 		log.Fatal(err)
 	}
 
-	validate := validator.New()  //インスタンス生成
-	errors := validate.Struct(param) //バリデーションを実行し、NGの場合、ここでエラーが返る。
-	if(errors != nil) {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"message": "title is required",
-			})
-		return
-	}
-
-	// if param.Title == "" {
-	// 	c.JSON(http.StatusBadRequest, gin.H{
-	// 		"message": "title is required",
-	// 	})
+	// validate := validator.New()  //インスタンス生成
+	// errors := validate.Struct(param) //バリデーションを実行し、NGの場合、ここでエラーが返る。
+	// if(errors != nil) {
+	// 		c.JSON(http.StatusBadRequest, gin.H{
+	// 			"message": "goバリデーターだよ",
+	// 		})
 	// 	return
 	// }
+
+	if param.Title == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "title is required",
+		})
+		return
+	}
 
 	todo := domain.CreateTodo{
 		Title: domain.TodoTitle{Value: param.Title},
@@ -201,6 +253,10 @@ type UsersResponse struct {
 
 type TodosResponse struct {
 	Todos []domain.Todo `json:"todos"`
+}
+
+type UserResponse struct {
+	User domain.User `json:"user"`
 }
 
 type TodoResponse struct {
