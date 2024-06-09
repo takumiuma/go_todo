@@ -9,23 +9,24 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type TodoHandler struct {
 	todoUsecase usecase.TodoUsecase
 }
 
-type User struct {
-	Name string `json:"name"`
-	Email string `json:"email"`
-	PhoneNumber string `json:"phone_number"`
+type RequestUser struct {
+	Name string `json:"name" validate:"required,min=1,max=30"`
+	Email string `json:"email" validate:"required,email"`
+	PhoneNumber string `json:"phone_number" validate:"required,numeric,min=10,max=11,excludes=."`
 }
 
-type Todo struct {
-	Id int `json:"id"`
-	Title string `json:"title" validate:"gt=0,lt=100"`
-	Person string `json:"person" validate:"oneof=担当者A 担当者B 担当者C"`
-	Done bool `json:"done"`
+type RequestTodo struct {
+	Id *uint `json:"id"`
+	Title string `json:"title" validate:"required,min=1,max=100"`
+	Person string `json:"person" validate:"required"`
+	Done *bool `json:"done" validate:"required"`
 }
 
 func (h TodoHandler) GetAllUser(c *gin.Context) {
@@ -85,27 +86,16 @@ func (h TodoHandler) GetById(c *gin.Context) {
 }
 
 func (h TodoHandler) RegistUser(c *gin.Context) {
-	var param User
+	var param RequestUser
 	if err := json.NewDecoder(c.Request.Body).Decode(&param); err != nil {
 		log.Fatal(err)
 	}
-
-	if param.Name == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "name is required",
-		})
-		return
-	}
-	if param.Email == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "email is required",
-		})
-		return
-	}
-	if param.PhoneNumber == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "phone_number is required",
-		})
+	validate := validator.New()  //インスタンス生成
+	errors := validate.Struct(param) //バリデーションを実行し、NGの場合、ここでエラーが返る。
+	if(errors != nil) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": errors.Error(),
+			})
 		return
 	}
 
@@ -131,24 +121,17 @@ func (h TodoHandler) RegistUser(c *gin.Context) {
 }
 
 func (h TodoHandler) Create(c *gin.Context) {
-	var param Todo
+	var param RequestTodo
 	if err := json.NewDecoder(c.Request.Body).Decode(&param); err != nil {
 		log.Fatal(err)
 	}
 
-	// validate := validator.New()  //インスタンス生成
-	// errors := validate.Struct(param) //バリデーションを実行し、NGの場合、ここでエラーが返る。
-	// if(errors != nil) {
-	// 		c.JSON(http.StatusBadRequest, gin.H{
-	// 			"message": "goバリデーターだよ",
-	// 		})
-	// 	return
-	// }
-
-	if param.Title == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "title is required",
-		})
+	validate := validator.New()  //インスタンス生成
+	errors := validate.Struct(param) //バリデーションを実行し、NGの場合、ここでエラーが返る。
+	if(errors != nil) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": errors.Error(),
+			})
 		return
 	}
 
@@ -173,18 +156,7 @@ func (h TodoHandler) Create(c *gin.Context) {
 }
 
 func (h TodoHandler) Update(c *gin.Context) {
-	paramsId := c.Params.ByName("id")
-	uintId, err := strconv.ParseUint(paramsId, 10, 32)
-	id := domain.TodoId{Value: uint(uintId)}
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-
-	var param Todo
+	var param RequestTodo
 	if err := json.NewDecoder(c.Request.Body).Decode(&param); err != nil {
 		log.Fatal(err)
 	}
@@ -194,14 +166,15 @@ func (h TodoHandler) Update(c *gin.Context) {
 		})
 		return
 	}
+	id := domain.TodoId{Value: uint(*param.Id)}
 
 	updateTodo := domain.UpdateTodo{
 		Title: domain.TodoTitle{Value: param.Title},
 		Person:domain.TodoPerson{Value:param.Person},
-		Done: domain.TodoDone{Value: param.Done},
+		Done: domain.TodoDone{Value: *param.Done},
 	}
 
-	err = h.todoUsecase.Update(id, updateTodo)
+	err := h.todoUsecase.Update(id, updateTodo)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
