@@ -16,8 +16,9 @@ func NewServer() *gin.Engine {
 	r.Use(cors.New(cors.Config{
 		// アクセスを許可したいアクセス元
 		AllowOrigins: []string{
-			"http://localhost:3000",
-			"http://localhost:5173",
+			"*", // TODO:モバイルアプリのCORS設定がわかったら修正する
+			// "http://localhost:3000",
+			// "http://localhost:5173",
 		},
 		// アクセスを許可したいHTTPメソッド
 		AllowMethods: []string{
